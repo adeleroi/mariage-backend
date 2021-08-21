@@ -1,0 +1,29 @@
+{
+  "name": "backendmariage",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/adeleroi/backend-mariage.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/adeleroi/backend-mariage/issues"
+  },
+  "homepage": "https://github.com/adeleroi/backend-mariage#readme",
+  "dependencies": {
+    "@sendgrid/mail": "^7.4.6",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "stripe": "^8.170.0",
+    "uuid": "^8.3.2"
+  }
+}
