@@ -12,10 +12,10 @@ const stripe = require('stripe')(process.env.STRIPE_API_KEY)
 const { v4: uuidv4 } = require('uuid');
 
 const app = express()
+app.use(cors())
 
 app.use(bodyParser.json()) // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true }))
-app.use(cors())
 
 const PORT = 4242 || process.env.PORT
 sgMail.setApiKey(process.env.SENDGRID_API_KEY)
