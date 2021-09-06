@@ -10,14 +10,14 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const stripe = require('stripe')(process.env.STRIPE_API_KEY)
 const { v4: uuidv4 } = require('uuid');
-
+const path = require('path')
 const app = express()
 app.use(cors())
 
 app.use(bodyParser.json()) // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true }))
 
-const PORT = 4242 || process.env.PORT
+const PORT = process.env.PORT || 4242  
 sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
 function greeting() {
@@ -102,20 +102,21 @@ app.post('/send-email-to-bride', async (req, res) => {
   }
 });
 
+
+// if(process.env.NODE_ENV ===  'production'){
+  //   app.use(express.static(__dirname + '/public/'));
+  //   app.get(/.*/, (req, res) => {
+    //     res.sendFile(__dirname + '/public/index.html')
+    //   });
+    // }
+    
+    
+    
+app.use(express.static(path.join(__dirname + '/public/')));
+app.get(/.*/, (req, res) => {
+  res.sendFile(path.join(__dirname + '/public/index.html'));
+})
+
 app.listen(PORT, () =>
   console.log(`Node server listening to ${PORT}`)
 );
-
-// if(process.env.NODE_ENV ===  'production'){
-//   app.use(express.static(__dirname + '/public/'));
-//   app.get(/.*/, (req, res) => {
-//     res.sendFile(__dirname + '/public/index.html')
-//   });
-// }
-
-
-
-app.use(express.static(__dirname + '/public/'));
-app.get(/.*/, (req, res) => {
-  res.sendFile(__dirname + '/public/index.html')
-})
