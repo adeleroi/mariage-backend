@@ -6,18 +6,28 @@ const dotenv = require('dotenv')
 dotenv.config()
 const sgMail = require('@sendgrid/mail')
 const express = require('express')
+const cors = require('cors')
 const bodyParser = require('body-parser')
 const stripe = require('stripe')(process.env.STRIPE_API_KEY)
-const greeting = require('./greeting')
 const { v4: uuidv4 } = require('uuid');
 
 const app = express()
 
 app.use(bodyParser.json()) // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(cors())
 
-const PORT = 5000 || process.env.PORT
+const PORT = 4242 || process.env.PORT
 sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+
+function greeting() {
+  const date = new Date()  
+  return ( 
+    date.getHours() > 12 ? 'Bonsoir':
+    date.getHours() == 12 && date.getMinutes() > 0 ? 'Bonsoir':
+    'Bonjour'
+  )
+}
 
 //////////////////////////////////////////////////// ***  SENDING EMAIL *** \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
@@ -45,73 +55,53 @@ app.post('/send-receipt-to-guest', (req, res) => {
   })
 })
 
-app.post('/send-guest-msg', (req, res) => {
-  console.log('req', req.body)
-  const senderEmail = 'ade.nguessan@outlook.fr'
-  const { username, body } = req.body
+app.post('/send-email-to-guest', async (req, res) => {
+  const { email, username } = req.body;
   const msg = {
-    to: 'wilfriednguess@gmail.com',
-    from: senderEmail,
+    to: [email, 'ruthtisam@yahoo.fr'],
+    from: 'ade.nguessan@outlook.fr',
     subject: "Confirmation d'invitation",
-    text: 'bonjourno ruith',
+    text: 'Accuse de reception',
     html: `
-      <h2 style="margin-bottom:12px">${greeting()} Ruth<h3>
-      <p style="margin-bottom:40px">L'invité ${username} a confirmé sa présence à la cérémonie de mariage.<p>
-      <strong>Message:</strong>
-      <p>${body}</p>
+    <br/>
+    <h2 style="margin-bottom:12px; margin-top: 5px; font-size:12px; font-weight: normal;">${greeting()} ${username},<h2>
+    <p style="margin-bottom:4px; font-size:12px; font-weight: normal;">Merci d'avoir confirmé votre présence à la cérémonie de mariage de Ruth et Dimitri.<p>
     `,
   }
-  sgMail.send(msg).then(() => {
-    res.status(200)
-    res.send({ msgToRuth:'Confirmation envoyé a Ruth' })
-  }).catch((error) => {
-    res.status(500)
-    res.send({ error })
-  })
-})
-
-
-///////////////////////////////////////////////////////// *** CHECKOUT SECTION *** \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-app.get('/create-checkout-session', async (req, res) => {
-  const domainURL = process.env.DOMAIN;
-
-  const { quantity } = req.body;
-
-  const pmTypes = (process.env.PAYMENT_METHOD_TYPES || 'card').split(',').map((m) => m.trim());
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: pmTypes,
-    mode: 'payment',
-    line_items: [
-      {
-        price: process.env.PRICE,
-        quantity: 1,
-
-      },
-    ],
-    success_url: `${domainURL}/success.html?session_id=${uuidv4()}`,
-    cancel_url: `${domainURL}/canceled.html`,
-  });
-
-  return res.redirect(303, session.url);
+  try {
+    await sgMail.send(msg)
+    res.status(200).send({sendToGuest: true})
+  } catch(e) {
+    res.status(500).send({sendToGuest: false})
+  }
 });
 
-
-////////////////////////////////////////////////////////// PAIEMENT INTENT \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-app.post('/create-payment-intent', async (req, res) => {
-  try {
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: 300,
-      currency: 'cad',
-    })
-    res.json({ clientSecret: paymentIntent.client_secret})
-  } catch (e) {
-    res.status(400).json({ error: { message: e.message }})
+app.post('/send-email-to-bride', async (req, res) => {
+  const { email, username, message } = req.body;
+  const msg = {
+    to: ['ruthtisam@yahoo.fr'],
+    from: 'ade.nguessan@outlook.fr',
+    subject: "Confirmation d'invitation",
+    text: 'Accuse de reception',
+    html: `
+    <img src="" style="margin-bottom:5px"/>
+    <br/>
+    <h2 style="margin-bottom:12px; margin-top: 5px; font-size:12px; font-weight: normal;">${greeting()} Les maries,<h2>
+    <p style="margin-bottom:4px; font-size:12px; font-weight: normal;">${username} a confirmé sa presence à votre mariage.<p>
+    
+    <h4>Message:</h4>
+    <p>${message}</p>
+    `,
   }
-})
+  
+  try {
+    await sgMail.send(msg)
+    res.status(200).send({sendToBride: true})
+  } catch(e) {
+    res.status(500).send({sendToBride: false})
+  }
+});
 
-
-
-
-app.listen(PORT, console.log('listening to port', PORT))
+app.listen(PORT, () =>
+  console.log(`Node server listening to ${PORT}`)
+);
