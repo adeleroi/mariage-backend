@@ -32,7 +32,7 @@ function greeting() {
 //////////////////////////////////////////////////// ***  SENDING EMAIL *** \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 app.post('/send-receipt-to-guest', (req, res) => {
-  const senderEmail = 'ade.nguessan@outlook.fr'
+  const senderEmail = 'ruthetdimitri@gmail.com'
   const { username, email, body } = req.body
   const msg = {
     to: email,
@@ -59,7 +59,7 @@ app.post('/send-email-to-guest', async (req, res) => {
   const { email, username } = req.body;
   const msg = {
     to: [email, 'ruthtisam@yahoo.fr'],
-    from: 'ade.nguessan@outlook.fr',
+    from: 'ruthetdimitri@gmail.com',
     subject: "Confirmation d'invitation",
     text: 'Accuse de reception',
     html: `
